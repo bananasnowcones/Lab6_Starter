@@ -24,6 +24,14 @@ async function init() {
     console.log('Recipe fetch unsuccessful');
     return;
   };
+
+  if(Object.keys(recipeData).length == recipes.length) {
+    resolve('Successfully fetched recipe data');
+  }
+  else {
+    reject('Error fetching recipe data');
+  }
+
   // Add the first three recipe cards to the page
   createRecipeCards();
   // Make the "Show more" button functional
@@ -38,30 +46,23 @@ async function fetchRecipes() {
     // for the keys. Once everything in the array has been successfully fetched, call the resolve(true)
     // callback function to resolve this promise. If there's any error fetching any of the items, call
     // the reject(false) function.
-
+    for(let i = 0; i < recipes.length; i++ ) {
+      fetch(recipes[i])
+        .then(response => {
+          recipeData[recipes[i]] = response.json();
+          console.log(recipeData[recipes[i]]); 
+          if(response.status >= 200 && response.status < 300) {
+            return Promise.resolve(response);
+          } else {
+            return Promise.reject('Error');
+          }
+        })
+        .catch(error => {console.log('Error fetching recipe');});
+    }
     // For part 2 - note that you can fetch local files as well, so store any JSON files you'd like to fetch
     // in the recipes folder and fetch them from there. You'll need to add their paths to the recipes array.
 
     // Part 1 Expose - TODO
-
-    for (let i  = 0; i < recipes.length; i++) {
-      fetch(recipes[i])
-        .then(response => {
-          recipeData[recipes[i]] = response.json();
-          console.log(recipes[i]);
-        })
-        .catch(error => {
-          console.log("Error fetching recipe");
-        });
-    }
-
-    if(Object.keys(recipeData).length == recipes.length) {
-      resolve("Sucessfully fetched recipe data");
-    }
-    else {
-      reject("Error fetching recipe data");
-    }
-
   });
 }
 
@@ -73,6 +74,12 @@ function createRecipeCards() {
   // show any others you've added when the user clicks on the "Show more" button.
 
   // Part 1 Expose - TODO
+
+  for (let recipe in recipeData) {
+    let newCard = document.createElement(recipe-card);
+    newCard.data = data(recipe);
+    main.appendChild(newCard);
+  }
 }
 
 function bindShowMore() {
