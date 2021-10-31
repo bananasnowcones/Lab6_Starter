@@ -1,8 +1,8 @@
 class RecipeCard extends HTMLElement {
   constructor() {
     // Part 1 Expose - TODO
-      super();
-      let shadow = this.attachShadow({mode: open});
+    super();
+    let shadow = this.attachShadow({mode: 'open'});
     // You'll want to attach the shadow DOM here
   }
 
@@ -19,7 +19,6 @@ class RecipeCard extends HTMLElement {
       a {
         text-decoration: none;
       }
-
       a:hover {
         text-decoration: underline;
       }
@@ -35,7 +34,6 @@ class RecipeCard extends HTMLElement {
         padding: 0 16px 16px 16px;
         width: 178px;
       }
-
       div.rating {
         align-items: center;
         column-gap: 5px;
@@ -48,7 +46,6 @@ class RecipeCard extends HTMLElement {
         object-fit: scale-down;
         width: 78px;
       }
-
       article > img {
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
@@ -57,7 +54,6 @@ class RecipeCard extends HTMLElement {
         margin-left: -16px;
         width: calc(100% + 32px);
       }
-
       p.ingredients {
         height: 32px;
         line-height: 16px;
@@ -68,7 +64,6 @@ class RecipeCard extends HTMLElement {
       p.organization {
         color: black !important;
       }
-
       p.title {
         display: -webkit-box;
         font-size: 16px;
@@ -78,7 +73,6 @@ class RecipeCard extends HTMLElement {
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
-
       p:not(.title), span, time {
         color: #70757A;
         font-size: 12px;
@@ -88,16 +82,71 @@ class RecipeCard extends HTMLElement {
 
     // Here's the root element that you'll want to attach all of your other elements to
     const card = document.createElement('article');
-    let image = document.createElement('img');
-    let title = document.createElement('p');
-    let titleURL = document.createElement('a');
-    let org = document.createElement('p');
-    let review = document.createElement('div');
-    let reviewIMG = document.createElement('img');
-    let time  = document.createElement('time');
-    let ingredients  = document.createElement('p');
+    const name = searchForKey(data, 'headline');
+
+    const image = document.createElement('img');
+    const picture = searchForKey(data, 'thumbnailUrl');
+    image.setAttribute('src', picture);
+    image.setAttribute('alt', name)
+    card.appendChild(image);
+
+    const title = document.createElement('p');
+    title.setAttribute('class', 'title');
+    card.appendChild(title);
+
+    const titlink = document.createElement('a');
+    const titurl = getUrl(data);
+    titlink.setAttribute('href', titurl);
+    titlink.textContent += name;
+    title.appendChild(titlink);
+
+    const org = document.createElement('p');
+    const orgname = getOrganization(data);
+    org.setAttribute('class', 'organization');
+    org.textContent += orgname;
+    card.appendChild(org);
+
+    const rating = document.createElement('div');
+    rating.setAttribute('class', 'rating');
+    card.appendChild(rating);
+    const aggRate = searchForKey(data, 'aggregateRating');
+    if(aggRate != undefined)
+    {
+      const avgRating = document.createElement('span');
+      let ratingValue = searchForKey(data, 'ratingValue');
+      avgRating.textContent += ratingValue;
+      rating.appendChild(avgRating);
+
+      const imgStar = document.createElement('img');
+      ratingValue = Math.round(ratingValue);
+      imgStar.setAttribute('src', 'https://raw.githubusercontent.com/brettbeat/Lab6_Starter/main/assets/images/icons/'+ratingValue+'-star.svg');
+      rating.appendChild(imgStar);
+
+      const numReviews = document.createElement('span');
+      const ratingCount = searchForKey(data, 'ratingCount');
+      numReviews.textContent += '(' + ratingCount + ')';
+      rating.appendChild(numReviews);
+    } else {
+      const noRating = document.createElement('span');
+      noRating.textContent += "No Reviews";
+      rating.appendChild(noRating);
+    }
+
+    const time = document.createElement('time');
+    let getTime = searchForKey(data, 'totalTime');
+    getTime = convertTime(getTime);
+    time.textContent += getTime;
+    card.appendChild(time);
+
+    const ingredients = document.createElement('p');
+    ingredients.setAttribute('class', 'ingredients');
+    let ingList = searchForKey(data, 'recipeIngredient');
+    ingList = createIngredientList(ingList);
+    ingredients.textContent += ingList;
+    card.appendChild(ingredients);
 
     
+
     // Some functions that will be helpful here:
     //    document.createElement()
     //    document.querySelector()
@@ -108,11 +157,10 @@ class RecipeCard extends HTMLElement {
 
     // Make sure to attach your root element and styles to the shadow DOM you
     // created in the constructor()
+    this.shadowRoot.appendChild(card);
+    this.shadowRoot.appendChild(styleElem);
 
     // Part 1 Expose - TODO
-
-  
-
   }
 }
 
